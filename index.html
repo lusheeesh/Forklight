@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Forklight</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#060816;
+  --bg2:#0d1328;
+  --card:rgba(255,255,255,0.05);
+  --card-border:rgba(255,255,255,0.08);
+  --text:#edf3ff;
+  --muted:#93a2c9;
+  --accent:#7c9cff;
+  --accent2:#5ce1e6;
+  --danger:#ff6b81;
+  --success:#4ade80;
+  --shadow:0 10px 35px rgba(0,0,0,0.45);
+  --radius:20px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at top left,#1d2f68 0%,transparent 30%),
+    radial-gradient(circle at bottom right,#092f39 0%,transparent 30%),
+    linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--text);
+  font-family:Inter,system-ui,sans-serif;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.5),transparent);
+  pointer-events:none;
+}
+
+.app{
+  max-width:1500px;
+  margin:auto;
+  padding:26px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:center;
+  margin-bottom:28px;
+  flex-wrap:wrap;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.brand-logo{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:grid;
+  place-items:center;
+  box-shadow:0 10px 25px rgba(92,225,230,.25);
+  font-size:26px;
+  font-weight:800;
+  color:#06111f;
+}
+
+.brand h1{
+  margin:0;
+  font-size:28px;
+  letter-spacing:-1px;
+}
+
+.brand p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.controls{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+button,input,select{
+  border:none;
+  outline:none;
+  font:inherit;
+}
+
+.btn{
+  background:rgba(255,255,255,0.06);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,0.08);
+  padding:12px 16px;
+  border-radius:14px;
+  cursor:pointer;
+  transition:.25s ease;
+  backdrop-filter:blur(10px);
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+  background:rgba(255,255,255,0.1);
+}
+
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#07111c;
+  font-weight:700;
+}
+
+.panel{
+  background:var(--card);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius);
+  padding:20px;
+  backdrop-filter:blur(20px);
+  box-shadow:var(--shadow);
+}
+
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;
+  margin-bottom:22px;
+}
+
+.metric h3{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:600;
+}
+
+.metric strong{
+  display:block;
+  margin-top:10px;
+  font-size:28px;
+}
+
+.toolbar{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  gap:14px;
+  margin-bottom:24px;
+}
+
+.input{
+  width:100%;
+  background:rgba(255,255,255,0.06);
+  color:var(--text);
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.06);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+  gap:18px;
+}
+
+.card{
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(18px);
+  padding:18px;
+  box-shadow:var(--shadow);
+  transition:.25s ease;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  width:240px;
+  height:240px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(124,156,255,.16),transparent 70%);
+  top:-120px;
+  right:-100px;
+}
+
+.profile{
+  display:flex;
+  gap:16px;
+}
+
+.avatar{
+  width:78px;
+  height:78px;
+  border-radius:22px;
+  overflow:hidden;
+  flex-shrink:0;
+  border:2px solid rgba(255,255,255,0.08);
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.info{
+  flex:1;
+}
+
+.name-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.name{
+  font-size:20px;
+  font-weight:800;
+}
+
+.username{
+  color:var(--muted);
+  margin-top:4px;
+  font-size:14px;
+}
+
+.bio{
+  margin-top:10px;
+  color:#cbd6f6;
+  line-height:1.5;
+  font-size:14px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:18px;
+}
+
+.stat{
+  background:rgba(255,255,255,0.04);
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+}
+
+.stat strong{
+  display:block;
+  font-size:18px;
+}
+
+.stat span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.repo-list{
+  margin-top:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.repo{
+  background:rgba(255,255,255,0.04);
+  border-radius:16px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,0.04);
+}
+
+.repo-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.repo a{
+  color:white;
+  text-decoration:none;
+  font-weight:700;
+}
+
+.repo-desc{
+  color:var(--muted);
+  margin-top:8px;
+  font-size:13px;
+  line-height:1.45;
+}
+
+.repo-bottom{
+  margin-top:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.lang{
+  background:rgba(124,156,255,.16);
+  color:#bfd1ff;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+}
+
+.small{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.badge{
+  background:rgba(74,222,128,.12);
+  color:#8bf0af;
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.empty{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--muted);
+}
+
+.footer{
+  margin-top:30px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:20px;
+}
+
+.modal.active{
+  display:flex;
+}
+
+.modal-box{
+  width:min(560px,100%);
+}
+
+.textarea{
+  width:100%;
+  min-height:180px;
+  resize:vertical;
+  background:rgba(255,255,255,0.05);
+  color:var(--text);
+  border-radius:16px;
+  padding:16px;
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.crossed {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.replacement {
+  display: inline-block;
+  transform: rotate(-3deg);
+  margin-left: 3px;
+  font-weight: 600;
+}
+
+.loading{
+  animation:pulse 1.2s infinite;
+}
+
+@keyframes pulse{
+  50%{opacity:.6}
+}
+
+@media(max-width:900px){
+  .toolbar{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:700px){
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .profile{
+    flex-direction:column;
+  }
+
+  .avatar{
+    width:100%;
+    height:240px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">F</div>
+      <div>
+        <h1>Forklight</h1>
+        <p>Modern GitHub intelligence dashboard</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="tokenBtn">Token</button>
+      <button class="btn" id="exportBtn">Export</button>
+      <button class="btn" id="importBtn">Import</button>
+      <button class="btn" id="resetBtn">Reset</button>
+      <button class="btn primary" id="addBtn">Add Profile</button>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="panel metric">
+      <h3>Tracked Profiles</h3>
+      <strong id="metricProfiles">0</strong>
+    </div>
+
+    <div class="panel metric">
+      <h3>Total Repositories</h3>
+      <strong id="metricRepos">0</strong>
+    </div>
+
+    <div class="panel metric">
+      <h3>Cached Requests</h3>
+      <strong id="metricCache">0</strong>
+    </div>
+
+    <div class="panel metric">
+      <h3>Visitor UID</h3>
+      <strong id="metricUID" style="font-size:14px;word-break:break-all"></strong>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input class="input" id="search" placeholder="Search profiles or repositories..." />
+
+    <select class="input" id="sort">
+      <option value="activity">Sort by activity</option>
+      <option value="followers">Sort by followers</option>
+      <option value="repos">Sort by repositories</option>
+      <option value="name">Sort by name</option>
+    </select>
+
+    <select class="input" id="filter">
+      <option value="all">All users</option>
+      <option value="popular">Popular only</option>
+      <option value="active">Recently active</option>
+    </select>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+<div class="footer">
+  Forklight • Made by 
+  <span class="crossed">lushy</span>
+  <span class="replacement">Claude Anthropic</span>
+</div>
+
+<div class="modal" id="modal">
+  <div class="panel modal-box">
+    <h2 id="modalTitle">Modal</h2>
+    <textarea class="textarea" id="modalTextarea"></textarea>
+
+    <div style="display:flex;gap:12px;margin-top:16px;justify-content:flex-end">
+      <button class="btn" id="closeModal">Cancel</button>
+      <button class="btn primary" id="saveModal">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY='forklight_dashboard_v3';
+const CACHE_KEY='forklight_cache_v3';
+const UID_KEY='forklight_uid';
+const CACHE_TTL=1000*60*10;
+const MAX_REPOS=5;
+
+const DEFAULT_STATE={
+  token:'',
+  users:[],
+  theme:'dark'
+};
+
+const state=loadState();
+const cache=loadCache();
+
+function uid(){
+  let id=localStorage.getItem(UID_KEY);
+
+  if(!id){
+    id='fork_'+crypto.randomUUID();
+    localStorage.setItem(UID_KEY,id);
+  }
+
+  return id;
+}
+
+function loadState(){
+  try{
+    return {
+      ...DEFAULT_STATE,
+      ...(JSON.parse(localStorage.getItem(STORAGE_KEY))||{})
+    };
+  }catch{
+    return DEFAULT_STATE;
+  }
+}
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+
+function loadCache(){
+  try{
+    return JSON.parse(localStorage.getItem(CACHE_KEY))||{};
+  }catch{
+    return {};
+  }
+}
+
+function saveCache(){
+  localStorage.setItem(CACHE_KEY,JSON.stringify(cache));
+}
+
+function apiHeaders(){
+  const h={Accept:'application/vnd.github+json'};
+
+  if(state.token.trim()){
+    h.Authorization='Bearer '+state.token.trim();
+  }
+
+  return h;
+}
+
+async function cachedFetch(key,url){
+  const item=cache[key];
+
+  if(item && item.expiry>Date.now()){
+    return item.value;
+  }
+
+  const res=await fetch(url,{headers:apiHeaders()});
+
+  if(!res.ok){
+    throw new Error('GitHub request failed');
+  }
+
+  const data=await res.json();
+
+  cache[key]={
+    expiry:Date.now()+CACHE_TTL,
+    value:data
+  };
+
+  saveCache();
+
+  return data;
+}
+
+async function fetchUser(username){
+  return cachedFetch(
+    'user_'+username,
+    'https://api.github.com/users/'+username
+  );
+}
+
+async function fetchRepos(username){
+  return cachedFetch(
+    'repos_'+username,
+    'https://api.github.com/users/'+username+'/repos?sort=pushed&per_page=100'
+  );
+}
+
+async function fetchEvents(username){
+  return cachedFetch(
+    'events_'+username,
+    'https://api.github.com/users/'+username+'/events?per_page=1'
+  );
+}
+
+function relative(date){
+  if(!date) return 'Unknown';
+
+  const diff=Math.floor((Date.now()-new Date(date))/1000);
+
+  const units=[
+    ['year',31536000],
+    ['month',2592000],
+    ['week',604800],
+    ['day',86400],
+    ['hour',3600],
+    ['minute',60]
+  ];
+
+  for(const [name,val] of units){
+    const amount=Math.floor(diff/val);
+
+    if(amount>=1){
+      return amount+' '+name+(amount>1?'s':'')+' ago';
+    }
+  }
+
+  return 'Just now';
+}
+
+function updateMetrics(users){
+  document.getElementById('metricProfiles').textContent=users.length;
+  document.getElementById('metricRepos').textContent=
+    users.reduce((a,b)=>a+b.repoCount,0);
+
+  document.getElementById('metricCache').textContent=
+    Object.keys(cache).length;
+
+  document.getElementById('metricUID').textContent=uid();
+}
+
+function createRepo(repo){
+  return `
+    <div class="repo">
+      <div class="repo-top">
+        <a href="${repo.html_url}" target="_blank">${repo.name}</a>
+        <div class="badge">★ ${repo.stargazers_count}</div>
+      </div>
+
+      <div class="repo-desc">
+        ${repo.description || 'No description provided'}
+      </div>
+
+      <div class="repo-bottom">
+        <div class="lang">${repo.language || 'Unknown'}</div>
+        <div class="small">Updated ${relative(repo.pushed_at)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function createCard(data){
+  return `
+    <div class="card">
+      <div class="profile">
+
+        <div class="avatar">
+          <img src="${data.profile.avatar_url}" />
+        </div>
+
+        <div class="info">
+
+          <div class="name-row">
+            <div>
+              <div class="name">${data.profile.name || data.profile.login}</div>
+              <div class="username">@${data.profile.login}</div>
+            </div>
+
+            <button class="btn remove-btn" data-user="${data.profile.login}">
+              Remove
+            </button>
+          </div>
+
+          <div class="bio">
+            ${data.profile.bio || 'No bio available'}
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <strong>${data.profile.followers}</strong>
+              <span>Followers</span>
+            </div>
+
+            <div class="stat">
+              <strong>${data.profile.public_repos}</strong>
+              <span>Repositories</span>
+            </div>
+
+            <div class="stat">
+              <strong>${relative(data.lastActivity)}</strong>
+              <span>Activity</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="repo-list">
+        ${data.repos.slice(0,MAX_REPOS).map(createRepo).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function loading(){
+  const grid=document.getElementById('grid');
+
+  grid.innerHTML='';
+
+  for(let i=0;i<6;i++){
+    const div=document.createElement('div');
+    div.className='card loading';
+    div.style.height='400px';
+    grid.appendChild(div);
+  }
+}
+
+async function build(){
+  loading();
+
+  const grid=document.getElementById('grid');
+
+  try{
+
+    const entries=[];
+
+    for(const username of state.users){
+      try{
+        const [profile,repos,events]=await Promise.all([
+          fetchUser(username),
+          fetchRepos(username),
+          fetchEvents(username)
+        ]);
+
+        entries.push({
+          profile,
+          repos,
+          repoCount:repos.length,
+          lastActivity:events?.[0]?.created_at || 0
+        });
+
+      }catch(err){
+        console.error(err);
+      }
+    }
+
+    applyFilters(entries);
+
+  }catch(err){
+    console.error(err);
+
+    grid.innerHTML=`
+      <div class="empty panel">
+        Failed to load dashboard
+      </div>
+    `;
+  }
+}
+
+function applyFilters(entries){
+  const query=document.getElementById('search').value.toLowerCase();
+  const sort=document.getElementById('sort').value;
+  const filter=document.getElementById('filter').value;
+
+  let arr=[...entries];
+
+  if(query){
+    arr=arr.filter(x=>
+      x.profile.login.toLowerCase().includes(query) ||
+      (x.profile.name||'').toLowerCase().includes(query) ||
+      x.repos.some(r=>r.name.toLowerCase().includes(query))
+    );
+  }
+
+  if(filter==='popular'){
+    arr=arr.filter(x=>x.profile.followers>=10);
+  }
+
+  if(filter==='active'){
+    arr=arr.filter(x=>Date.now()-new Date(x.lastActivity)<1000*60*60*24*7);
+  }
+
+  arr.sort((a,b)=>{
+    if(sort==='followers'){
+      return b.profile.followers-a.profile.followers;
+    }
+
+    if(sort==='repos'){
+      return b.profile.public_repos-a.profile.public_repos;
+    }
+
+    if(sort==='name'){
+      return a.profile.login.localeCompare(b.profile.login);
+    }
+
+    return new Date(b.lastActivity)-new Date(a.lastActivity);
+  });
+
+  updateMetrics(arr);
+
+  const grid=document.getElementById('grid');
+
+  if(!arr.length){
+    grid.innerHTML=`
+      <div class="empty panel">
+        No profiles added yet.<br><br>
+        Click “Add Profile” to begin.
+      </div>
+    `;
+
+    return;
+  }
+
+  grid.innerHTML=arr.map(createCard).join('');
+
+  document.querySelectorAll('.remove-btn').forEach(btn=>{
+    btn.onclick=()=>{
+      state.users=state.users.filter(x=>x!==btn.dataset.user);
+      saveState();
+      build();
+    };
+  });
+}
+
+function openModal(title,value,callback){
+  document.getElementById('modal').classList.add('active');
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalTextarea').value=value || '';
+
+  document.getElementById('saveModal').onclick=()=>{
+    callback(document.getElementById('modalTextarea').value);
+    closeModal();
+  };
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('active');
+}
+
+window.addEventListener('click',e=>{
+  if(e.target.id==='modal'){
+    closeModal();
+  }
+});
+
+window.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeModal();
+  }
+});
+
+document.getElementById('closeModal').onclick = closeModal;
+
+addBtn.onclick=()=>{
+  const username=prompt('GitHub username');
+
+  if(!username) return;
+
+  if(state.users.includes(username)) return;
+
+  state.users.push(username.trim());
+  saveState();
+  build();
+};
+
+resetBtn.onclick=()=>{
+  if(confirm('Reset local dashboard?')){
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(CACHE_KEY);
+    location.reload();
+  }
+};
+
+search.oninput=build;
+sort.onchange=build;
+filter.onchange=build;
+
+exportBtn.onclick=()=>{
+  const blob=new Blob([
+    JSON.stringify(state,null,2)
+  ],{type:'application/json'});
+
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='forklight-config.json';
+  a.click();
+};
+
+importBtn.onclick=()=>{
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='application/json';
+
+  input.onchange=async()=>{
+    const file=input.files[0];
+    if(!file) return;
+
+    const text=await file.text();
+
+    try{
+      const parsed=JSON.parse(text);
+
+      state.users=parsed.users || [];
+      state.token=parsed.token || '';
+
+      saveState();
+      build();
+
+    }catch{
+      alert('Invalid config file');
+    }
+  };
+
+  input.click();
+};
+
+tokenBtn.onclick=()=>{
+  openModal(
+    'GitHub Personal Access Token',
+    state.token,
+    value=>{
+      state.token=value.trim();
+      saveState();
+      build();
+    }
+  );
+};
+
+// Toast System
+function toast(message){
+  const el=document.createElement('div');
+  el.textContent=message;
+  el.style.position='fixed';
+  el.style.bottom='20px';
+  el.style.right='20px';
+  el.style.padding='14px 18px';
+  el.style.borderRadius='14px';
+  el.style.background='rgba(15,23,42,.92)';
+  el.style.border='1px solid rgba(255,255,255,.08)';
+  el.style.backdropFilter='blur(12px)';
+  el.style.zIndex='9999';
+  el.style.boxShadow='0 10px 30px rgba(0,0,0,.35)';
+  document.body.appendChild(el);
+
+  setTimeout(()=>{
+    el.remove();
+  },3000);
+}
+
+// Token Validation
+async function validateToken(){
+  if(!state.token) return;
+
+  try{
+    const res=await fetch('https://api.github.com/user',{
+      headers:apiHeaders()
+    });
+
+    if(!res.ok){
+      toast('GitHub token invalid');
+    }else{
+      toast('GitHub token connected');
+    }
+
+  }catch{
+    toast('Unable to validate token');
+  }
+}
+
+// Theme System
+function applyTheme(){
+  document.documentElement.dataset.theme=state.theme;
+}
+
+applyTheme();
+validateToken();
+build();
+</script>
+</body>
+</html>
