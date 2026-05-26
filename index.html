@@ -29,6 +29,10 @@
   box-sizing:border-box;
 }
 
+*{
+  -webkit-tap-highlight-color: transparent;
+}
+
 html,body{
   margin:0;
   min-height:100%;
@@ -446,6 +450,7 @@ button,input,select{
     </div>
 
     <div class="controls">
+      <button class="btn" id="oauthBtn">Login with GitHub</button>
       <button class="btn" id="tokenBtn">Token</button>
       <button class="btn" id="exportBtn">Export</button>
       <button class="btn" id="importBtn">Import</button>
@@ -621,6 +626,20 @@ async function fetchEvents(username){
     'events_'+username,
     'https://api.github.com/users/'+username+'/events?per_page=1'
   );
+}
+
+async function validateUsername(username){
+  try{
+    const res=await fetch(
+      'https://api.github.com/users/'+encodeURIComponent(username),
+      { headers: apiHeaders() }
+    );
+
+    return res.ok;
+
+  }catch{
+    return false;
+  }
 }
 
 function relative(date){
@@ -881,15 +900,34 @@ window.addEventListener('keydown',e=>{
 
 document.getElementById('closeModal').onclick = closeModal;
 
-addBtn.onclick=()=>{
+document.getElementById('addBtn').onclick=async()=>{
+
   const username=prompt('GitHub username');
 
   if(!username) return;
 
-  if(state.users.includes(username)) return;
+  const clean=username.trim();
 
-  state.users.push(username.trim());
+  if(state.users.includes(clean)){
+    toast('Profile already added');
+    return;
+  }
+
+  toast('Validating profile...');
+
+  const valid=await validateUsername(clean);
+
+  if(!valid){
+    toast('GitHub profile not found');
+    return;
+  }
+
+  state.users.push(clean);
+
   saveState();
+
+  toast('Profile added');
+
   build();
 };
 
@@ -916,28 +954,72 @@ exportBtn.onclick=()=>{
   a.click();
 };
 
-importBtn.onclick=()=>{
+document.getElementById('importBtn').onclick=()=>{
+
   const input=document.createElement('input');
+
   input.type='file';
   input.accept='application/json';
 
   input.onchange=async()=>{
+
     const file=input.files[0];
+
     if(!file) return;
 
-    const text=await file.text();
-
     try{
+
+      const text=await file.text();
+
       const parsed=JSON.parse(text);
 
-      state.users=parsed.users || [];
-      state.token=parsed.token || '';
+      if(!Array.isArray(parsed.users)){
+        toast('Invalid config format');
+        return;
+      }
+
+      toast('Validating profiles...');
+
+      const validUsers=[];
+
+      for(const rawUser of parsed.users){
+
+        const username=String(rawUser).trim();
+
+        if(!username) continue;
+
+        const valid=await validateUsername(username);
+
+        if(valid){
+          validUsers.push(username);
+        }
+      }
+
+      state.users=[...new Set(validUsers)];
+
+      state.token=typeof parsed.token==='string'
+        ? parsed.token
+        : '';
+
+      if(parsed.theme){
+        state.theme=parsed.theme;
+      }
 
       saveState();
+
+      toast(
+        `Imported ${validUsers.length} valid profile${
+          validUsers.length!==1?'s':''
+        }`
+      );
+
       build();
 
-    }catch{
-      alert('Invalid config file');
+    }catch(err){
+
+      console.error(err);
+
+      toast('Invalid config file');
     }
   };
 
@@ -955,6 +1037,112 @@ tokenBtn.onclick=()=>{
     }
   );
 };
+
+// ========================
+// GITHUB OAUTH
+// ========================
+
+// CHANGE THIS TO YOUR VERCEL URL
+const OAUTH_REDIRECT =
+  window.location.origin + '/callback.html';
+
+// YOUR GITHUB OAUTH APP CLIENT ID
+const OAUTH_CLIENT_ID =
+  'Ov23liBhJ5e1I3ryZzcP';
+
+// LOGIN BUTTON
+document.getElementById('oauthBtn').onclick = () => {
+
+  const stateToken = crypto.randomUUID();
+
+  localStorage.setItem(
+    'forklight_oauth_state',
+    stateToken
+  );
+
+  const params = new URLSearchParams({
+    client_id: OAUTH_CLIENT_ID,
+    redirect_uri: OAUTH_REDIRECT,
+    scope: 'read:user',
+    state: stateToken
+  });
+
+  window.location.href =
+    'https://github.com/login/oauth/authorize?'
+    + params.toString();
+};
+
+// HANDLE CALLBACK
+(async function handleOAuthCallback(){
+
+  const params = new URLSearchParams(
+    window.location.search
+  );
+
+  const code = params.get('code');
+
+  const stateParam = params.get('state');
+
+  if(!code) return;
+
+  const savedState =
+    localStorage.getItem('forklight_oauth_state');
+
+  if(savedState !== stateParam){
+    toast('OAuth security check failed');
+    return;
+  }
+
+  toast('Logging in with GitHub...');
+
+  try{
+
+    const response = await fetch(
+      '/api/github-oauth',
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({ code })
+      }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+      toast(data.error || 'OAuth failed');
+      return;
+    }
+
+    if(!data.access_token){
+      toast('No access token returned');
+      return;
+    }
+
+    state.token = data.access_token;
+
+    saveState();
+
+    toast('GitHub OAuth connected');
+
+    // CLEAN URL
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
+    );
+
+    validateToken();
+
+  }catch(err){
+
+    console.error(err);
+
+    toast('OAuth request failed');
+  }
+
+})();
 
 // Toast System
 function toast(message){
